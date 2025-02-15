@@ -24,10 +24,16 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  display: block; /* Asegura que el body no esté afectando el layout */
   min-width: 320px;
   min-height: 100vh;
+}
+
+.app-container {
+  display: flex;
+  place-items: center;
+  min-height: 100vh;
+  flex-direction: column;
 }
 
 h1 {
