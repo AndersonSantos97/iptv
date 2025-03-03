@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import VideoPlayer from "../components/VideoPlayer";
-import { parseM3U, Channel } from "../services/m3uService";  // Asegúrate de tener la función parseM3U correctamente implementada
+import { parseM3U, Channel } from "../services/m3uService";
 
 const HomeScreen: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -8,53 +8,24 @@ const HomeScreen: React.FC = () => {
 
   const loadChannels = async () => {
     try {
-      // Obtener el archivo M3U
-      const response = await fetch("https://iptv-org.github.io/iptv/languages/spa.m3u", {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        throw new Error("No se pudo obtener el archivo M3U");
-      }
-
-      const m3uData = await response.text();  // Obtenemos el contenido del archivo M3U como texto
-      const parsedChannels = parseM3U(m3uData);  // Usa tu función parseM3U para obtener los canales
-      setChannels(parsedChannels);  // Guarda los canales en el estado
-
-    } catch (error) {
-      console.error("Error al cargar los canales:", error);
-    }
-  };
-
-  const loadChannel = async (channelUrl: string) => {
-    try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token"); // Obtener token
       if (!token) {
         throw new Error("No hay token disponible");
       }
 
-      const response = await fetch(`http://127.0.0.1:8000/proxy?url=${encodeURIComponent(channelUrl)}`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch("https://iptv-org.github.io/iptv/languages/spa.m3u");
+      const m3uText = await response.text(); // Obtener el texto del archivo M3U
+      const parsedChannels = parseM3U(m3uText); // Función para parsear el M3U
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: No se pudo obtener el archivo M3U`);
-      }
-
-      const data = await response.blob();
-      const videoUrl = URL.createObjectURL(data);
-      setCurrentChannel(videoUrl);
+      setChannels(parsedChannels); // Establecer los canales
     } catch (error) {
-      console.error("Error al cargar el canal:", error);
+      console.error("Error al cargar los canales:", error);
+      setChannels([]); // Evitar el error de `map` cuando no hay datos
     }
   };
 
   useEffect(() => {
-    loadChannels();  // Cargar los canales al inicio
+    loadChannels();
   }, []);
 
   useEffect(() => {
@@ -73,7 +44,7 @@ const HomeScreen: React.FC = () => {
               <li key={index} className="mb-4">
                 <button
                   className="w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-lg"
-                  onClick={() => setCurrentChannel(channel.url)}  // Cargar el canal seleccionado
+                  onClick={() => setCurrentChannel(channel.url)}
                 >
                   {channel.name}
                 </button>
